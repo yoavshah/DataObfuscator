@@ -19,7 +19,7 @@ namespace DataObfuscator {
 	template<typename T, T(*enc_fun)(T, int), T(*dec_fun)(T, int), int... I>
 	struct DataObfuscator<T, enc_fun, dec_fun, Indexes<I...>> {
 
-		constexpr __forceinline DataObfuscator(const std::initializer_list<T> list) : _buffer{ encrypt(*(list.begin() + I), I) ... }
+		constexpr __forceinline DataObfuscator(const std::initializer_list<T> list) : _buffer{ encrypt(*(list.begin() + I), I) ... } , size{ sizeof...(I) }
 		{ }
 
 		inline const void decrypt()
@@ -28,13 +28,25 @@ namespace DataObfuscator {
 				_buffer[i] = decrypt(_buffer[i], i);
 		}
 
-		volatile T _buffer[sizeof...(I)];
+		T& operator[](int i) 
+		{
+			return _buffer[i];
+		}
+
+		int getsize()
+		{
+			return size;
+		}
+
+		
 
 	private:
 		// compile time encryption / decryption routines.
 		constexpr T __forceinline encrypt(T c, int i) const { return enc_fun(c, i); }
 		constexpr T decrypt(T c, int i) const { return dec_fun(c, i); }
 
+		T _buffer[sizeof...(I)];
+		const int size;
 	};
 
 	constexpr unsigned int list_size(const std::initializer_list<int> list)
@@ -44,5 +56,6 @@ namespace DataObfuscator {
 }
 
 #define SINGLE_ARG(...) __VA_ARGS__
+
 #define OBF_GET_OVERALL_TYPE(t, enc_fun, dec_fun, ...) DataObfuscator::DataObfuscator<t, enc_fun, dec_fun, DataObfuscator::Make_Indexes<DataObfuscator::list_size(__VA_ARGS__)>::type>
 #define OBF_DATA(t, var_name, enc_fun, dec_fun, ...) OBF_GET_OVERALL_TYPE(t, enc_fun, dec_fun, __VA_ARGS__) var_name(__VA_ARGS__); var_name.decrypt();

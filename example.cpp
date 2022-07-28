@@ -8,8 +8,8 @@ int main()
 {
 	OBF_DATA(long long, da, SINGLE_ARG(e<long long, 1>), SINGLE_ARG(d<long long, 1>), {0,1,2,3});
 
-	for (size_t i = 0; i < sizeof(da._buffer) / sizeof(long long); i++)
+	for (size_t i = 0; i < da.getsize(); i++)
 	{
-		printf("%d\n", da._buffer[i]);
+		printf("%d\n", da[i]);
 	}
 }
