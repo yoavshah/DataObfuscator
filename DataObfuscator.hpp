@@ -20,7 +20,7 @@ namespace DataObfuscator {
 		template<typename T, T(*enc_fun)(T, int), T(*dec_fun)(T, int), int... I>
 		struct ArrayObfuscator<T, enc_fun, dec_fun, Indexes<I...>> {
 
-			constexpr __forceinline ArrayObfuscator(const std::initializer_list<T> list) : buffer{ encrypt(*(list.begin() + I), I) ... }, size{ sizeof...(I) }
+			constexpr __forceinline ArrayObfuscator(const std::initializer_list<T> &list) : buffer{ encrypt(*(list.begin() + I), I) ... }, size{ sizeof...(I) }
 			{ }
 
 			inline void decrypt()
@@ -33,6 +33,12 @@ namespace DataObfuscator {
 			T operator[](int i)
 			{
 				return static_cast<T>(buffer[i]);
+			}
+
+
+			operator T*()
+			{
+				return const_cast<T*>(buffer);
 			}
 
 			int getsize()
