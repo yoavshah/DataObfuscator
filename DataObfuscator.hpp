@@ -103,7 +103,7 @@ namespace DataObfuscator {
 
 
 #define DATAOBJ_SINGLE_ARG(...) __VA_ARGS__
-#define DATAOBJ_OBFDATA(t, var_name, enc_fun, dec_fun, ...) DataObfuscator::ArrayObfuscator::ArrayObfuscator<t, enc_fun, dec_fun, DataObfuscator::Make_Indexes<DataObfuscator::ArrayObfuscator::list_size<t>(__VA_ARGS__)>::type> var_name(__VA_ARGS__); var_name.decrypt();
+#define DATAOBJ_OBFARRAY(t, var_name, enc_fun, dec_fun, ...) DataObfuscator::ArrayObfuscator::ArrayObfuscator<t, enc_fun, dec_fun, DataObfuscator::Make_Indexes<DataObfuscator::ArrayObfuscator::list_size<t>(__VA_ARGS__)>::type> var_name(__VA_ARGS__); var_name.decrypt();
 
 #define DATAOBJ_GET_STR_TYPE(str) std::remove_const<std::remove_pointer<std::decay<decltype(str)>::type>::type>::type
 #define DATAOBJ_OBFSTR(str, enc_func, dec_func, ...) (DataObfuscator::StringObfuscator::StringObfuscator<DATAOBJ_GET_STR_TYPE(str), enc_func<DATAOBJ_GET_STR_TYPE(str), ##__VA_ARGS__>, dec_func<DATAOBJ_GET_STR_TYPE(str), ##__VA_ARGS__>, DataObfuscator::Make_Indexes<sizeof(str) - 1>::type>(str)).decrypt()

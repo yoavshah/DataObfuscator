@@ -24,7 +24,7 @@ int main()
 	/*
 		Encrypting at compile time using e3 and decrypte at run-time using d3 with keys K1=0xFF, K2=0xEEEE, K3=0x12, K4=0x333333
 	*/
-	DATAOBJ_OBFDATA(unsigned long long, data1, DATAOBJ_SINGLE_ARG(e3<unsigned long long, 0xFF, 0xEEEE, 0x12, 0x333333>), DATAOBJ_SINGLE_ARG(d3<unsigned long long, 0xFF, 0xEEEE, 0x12, 0x333333>), {0x1111111111111111, 0x3333333333333333, 0x3333333333333333, 0x7777777777777777});
+	DATAOBJ_OBFARRAY(unsigned long long, data1, DATAOBJ_SINGLE_ARG(e3<unsigned long long, 0xFF, 0xEEEE, 0x12, 0x333333>), DATAOBJ_SINGLE_ARG(d3<unsigned long long, 0xFF, 0xEEEE, 0x12, 0x333333>), {0x1111111111111111, 0x3333333333333333, 0x3333333333333333, 0x7777777777777777});
 	for (size_t i = 0; i < data1.getsize(); i++)
 	{
 		printf("(data1): Obfuscated var at %d : %llx\n", i, data1[i]);
@@ -40,7 +40,7 @@ int main()
 
 	printf("\n");
 
-	DATAOBJ_OBFDATA(char, data2, DATAOBJ_SINGLE_ARG(e1<char, 0xFF>), DATAOBJ_SINGLE_ARG(d1<char, 0xFF>), { 'A', 'B', 'C', 'D', '\n'});
+	DATAOBJ_OBFARRAY(char, data2, DATAOBJ_SINGLE_ARG(e1<char, 0xFF>), DATAOBJ_SINGLE_ARG(d1<char, 0xFF>), { 'A', 'B', 'C', 'D', '\n'});
 	for (size_t i = 0; i < data2.getsize(); i++)
 	{
 		printf("(data2) Obfuscated var at %d : %c\n", i, data2[i]);
