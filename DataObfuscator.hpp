@@ -1,7 +1,7 @@
 #include <initializer_list>
 #include <type_traits>
 
-
+#pragma optimize("", off)
 namespace DataObfuscator {
 
 	// Compile time index array.
@@ -30,9 +30,9 @@ namespace DataObfuscator {
 
 			}
 
-			T& operator[](int i)
+			T operator[](int i)
 			{
-				return buffer[i];
+				return static_cast<T>(buffer[i]);
 			}
 
 			int getsize()
@@ -47,11 +47,11 @@ namespace DataObfuscator {
 
 			T decrypt(T c, int i) { return dec_fun(c, i); }
 
-			T buffer[sizeof...(I)];
-			const int size;
+			volatile T buffer[sizeof...(I)];
+			volatile const int size;
 		};
 
-		constexpr unsigned int list_size(const std::initializer_list<int> list)
+		template<typename T> constexpr unsigned int list_size(const std::initializer_list<T> list)
 		{
 			return list.size();
 		}
@@ -93,9 +93,11 @@ namespace DataObfuscator {
 		};
 	}
 }
+#pragma optimize("", on)
+
 
 #define DATAOBJ_SINGLE_ARG(...) __VA_ARGS__
-#define DATAOBJ_OBFDATA(t, var_name, enc_fun, dec_fun, ...) DataObfuscator::ArrayObfuscator::ArrayObfuscator<t, enc_fun, dec_fun, DataObfuscator::Make_Indexes<DataObfuscator::ArrayObfuscator::list_size(__VA_ARGS__)>::type> var_name(__VA_ARGS__);// var_name.decrypt();
+#define DATAOBJ_OBFDATA(t, var_name, enc_fun, dec_fun, ...) DataObfuscator::ArrayObfuscator::ArrayObfuscator<t, enc_fun, dec_fun, DataObfuscator::Make_Indexes<DataObfuscator::ArrayObfuscator::list_size<t>(__VA_ARGS__)>::type> var_name(__VA_ARGS__); var_name.decrypt();
 
 #define DATAOBJ_GET_STR_TYPE(str) std::remove_const<std::remove_pointer<std::decay<decltype(str)>::type>::type>::type
 #define DATAOBJ_OBFSTR(str, enc_func, dec_func, ...) (DataObfuscator::StringObfuscator::StringObfuscator<DATAOBJ_GET_STR_TYPE(str), enc_func<DATAOBJ_GET_STR_TYPE(str), ##__VA_ARGS__>, dec_func<DATAOBJ_GET_STR_TYPE(str), ##__VA_ARGS__>, DataObfuscator::Make_Indexes<sizeof(str) - 1>::type>(str)).decrypt()
