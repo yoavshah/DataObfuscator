@@ -41,7 +41,18 @@ namespace DataObfuscator {
 				return const_cast<T*>(buffer);
 			}
 
-			int getsize()
+			T* copy()
+			{
+				T* object = new T[getsize() * sizeof(T)]{};
+				for (size_t i = 0; i < getsize(); i++)
+				{
+					object[i] = buffer[i];
+				}
+
+				return object;
+			}
+
+			constexpr int getsize() const
 			{
 				return size;
 			}
@@ -54,7 +65,7 @@ namespace DataObfuscator {
 			T decrypt(T c, int i) { return dec_fun(c, i); }
 
 			volatile T buffer[sizeof...(I)];
-			volatile const int size;
+			const int size;
 		};
 
 		template<typename T> constexpr unsigned int list_size(const std::initializer_list<T> list)

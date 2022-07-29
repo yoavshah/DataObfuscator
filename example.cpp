@@ -18,6 +18,18 @@ DATAOBJ_FUNC(d3, unsigned int K1, unsigned int K2, unsigned long K3, unsigned in
 	return ((((c ^ K4) + K3) ^ K2) - K1);
 }
 
+char* data_global;
+unsigned int size;
+
+void create_global()
+{
+	DATAOBJ_OBFARRAY(char, data_g, DATAOBJ_SINGLE_ARG(e1<char, 0xDD>), DATAOBJ_SINGLE_ARG(d1<char, 0xDD>), { 'G', 'L', 'O', 'B', 'A', 'L', '\n' });
+
+	data_global = data_g.copy();
+	size = data_g.getsize();
+
+}
+
 int main()
 {
 
@@ -48,6 +60,12 @@ int main()
 
 	printf("\n");
 
+	create_global();
+	for (size_t i = 0; i < size; i++)
+	{
+		printf("(data_global) Obfuscated var at %d : %c\n", i, data_global[i]);
+	}
+
 	// OBF(str, e, d, K, W)
 	printf(DATAOBJ_OBFSTR("This is an encrypted string 1\n", e1, d1, 0x01));
 
@@ -55,5 +73,5 @@ int main()
 
 	wprintf(DATAOBJ_OBFSTR(L"This is an encrypted string 3\n", e3, d3, 0x11, 0x33, 0x33, 0x77));
 	
-
 }
+
