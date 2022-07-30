@@ -33,13 +33,23 @@ void create_global()
 template<typename T, typename F> constexpr F __forceinline ee(T c) { return c + 5; }
 template<typename T, typename F> constexpr T __forceinline dd(F c) { return c - 5; }
 
+
+
+
 int main()
 {
+
+	long long x = DataObfuscator::MetaRandom::rand<long long, __COUNTER__>().value;
+	printf("%lld\n", x);
+
+	x = DataObfuscator::MetaRandom::rand<int, __COUNTER__>().value;
+	printf("%lld\n", x);
+
 
 	for (size_t i = 0; i < 3; i++)
 	{
 		auto x = DATAOBJ_OBFVALUE(int, long, 100, ee, dd);
-		printf("%d\n", (int)x);
+		printf("%d\n", x);
 	}
 	return 0;
 

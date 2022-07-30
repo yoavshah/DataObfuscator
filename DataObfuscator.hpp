@@ -42,7 +42,7 @@ namespace DataObfuscator {
 		template<int n> struct rand_generator {
 		private:
 			static constexpr unsigned a = 16807;        // 7^5
-			static constexpr unsigned m = std::numeric_limits<__int64>::max();
+			static constexpr unsigned m = 2147483647;	// 2^31 - 1
 
 			static constexpr unsigned s = rand_generator<n - 1>::value;
 			static constexpr unsigned lo = a * (s & 0xFFFF);                // Multiply lower 16 bits by 16807
@@ -62,9 +62,28 @@ namespace DataObfuscator {
 			static constexpr unsigned value = seed;
 		};
 
-		template<int n, int m> struct rand
+		template<typename T, unsigned int l, typename Indexes> struct rand_helper;
+
+		template<typename T, unsigned int l, int... I> struct rand_helper<T, l, Indexes<I...>> {
+			
+			volatile const __int32 rand_buffers[sizeof...(I)];
+
+			constexpr __forceinline rand_helper() : rand_buffers{ rand_generator<l + I>::value...}
+			{ }
+
+			operator T() const {
+				return *((T*)rand_buffers);
+			}
+
+		};
+
+		template<typename T, unsigned int l> struct rand
 		{
-			static const int value = rand_generator<n>::value % m;
+			const T value;
+			
+			constexpr __forceinline rand() : value{ rand_helper<T, l, Make_Indexes<(const int)(sizeof(T) / sizeof(__int32)) + 1>::type>() }
+			{
+			}
 		};
 
 
