@@ -30,8 +30,18 @@ void create_global()
 
 }
 
+template<typename T, typename F> constexpr F __forceinline ee(T c) { return c + 5; }
+template<typename T, typename F> constexpr T __forceinline dd(F c) { return c - 5; }
+
 int main()
 {
+
+	for (size_t i = 0; i < 3; i++)
+	{
+		auto x = DATAOBJ_OBFVALUE(int, long, 100, ee, dd);
+		printf("%d\n", (int)x);
+	}
+	return 0;
 
 	/*
 		Encrypting at compile time using e3 and decrypte at run-time using d3 with keys K1=0xFF, K2=0xEEEE, K3=0x12, K4=0x333333
