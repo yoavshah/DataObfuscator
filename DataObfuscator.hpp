@@ -37,14 +37,31 @@ namespace DataObfuscator {
 			}
 		}
 
-		const unsigned int seed = hash_str(date);
+		constexpr unsigned __int32 hash_int(unsigned int data)
+		{
 
-		template<int n> struct rand_generator {
+			unsigned __int32 hash = 0x13134803;
+			for (;;)
+			{
+				const unsigned int c = (data % 10) + '0';
+				data = data / 10;
+				hash = (((hash << 5) | (hash >> 27)) + c) & 0xFFFFFFFF;
+				if (data == 0)
+				{
+					break;
+				}
+
+			}
+
+			return hash;
+		}
+
+		template<unsigned int seed, unsigned int i> struct rand_generator {
 		private:
 			static constexpr unsigned a = 16807;        // 7^5
 			static constexpr unsigned m = 2147483647;	// 2^31 - 1
 
-			static constexpr unsigned s = rand_generator<n - 1>::value;
+			static constexpr unsigned s = rand_generator<seed, i - 1>::value;
 			static constexpr unsigned lo = a * (s & 0xFFFF);                // Multiply lower 16 bits by 16807
 			static constexpr unsigned hi = a * (s >> 16);                   // Multiply higher 16 bits by 16807
 			static constexpr unsigned lo2 = lo + ((hi & 0x7FFF) << 16);     // Combine lower 15 bits of hi with lo's upper bits
@@ -56,19 +73,17 @@ namespace DataObfuscator {
 			static constexpr unsigned value = lo3 > m ? lo3 - m : lo3;
 
 		};
-
-		template<> struct rand_generator<0>
+		template<unsigned int seed> struct rand_generator<seed, 0>
 		{
-			static constexpr unsigned value = seed;
+			static constexpr unsigned value = hash_int(hash_int(seed));
 		};
 
-		template<typename T, unsigned int l, typename Indexes> struct rand_helper;
-
-		template<typename T, unsigned int l, int... I> struct rand_helper<T, l, Indexes<I...>> {
+		template<typename T, unsigned int seed, typename Indexes> struct rand_helper;
+		template<typename T, unsigned int seed, int... I> struct rand_helper<T, seed, Indexes<I...>> {
 			
 			volatile const __int32 rand_buffers[sizeof...(I)];
 
-			constexpr __forceinline rand_helper() : rand_buffers{ rand_generator<l + I>::value...}
+			constexpr __forceinline rand_helper() : rand_buffers{ rand_generator<seed, I + 5>::value...}
 			{ }
 
 			operator T() const {
@@ -77,15 +92,23 @@ namespace DataObfuscator {
 
 		};
 
-		template<typename T, unsigned int l> struct rand
+		template<typename T, unsigned int seed, bool compile_rand> struct rand;
+		template<typename T, unsigned int seed> struct rand<T, seed, false>
 		{
 			const T value;
-			
-			constexpr __forceinline rand() : value{ rand_helper<T, l, Make_Indexes<(const int)(sizeof(T) / sizeof(__int32)) + 1>::type>() }
+
+			constexpr __forceinline rand() : value{ rand_helper<T, seed, Make_Indexes<(const int)(sizeof(T) / sizeof(__int32)) + 1>::type>() }
 			{
 			}
 		};
+		template<typename T, unsigned int seed> struct rand<T, seed, true>
+		{
+			const T value;
 
+			constexpr __forceinline rand() : value{ rand_helper<T, seed + hash_str(date), Make_Indexes<(const int)(sizeof(T) / sizeof(__int32)) + 1>::type>()}
+			{
+			}
+		};
 
 	}
 
@@ -218,3 +241,5 @@ namespace DataObfuscator {
 #define DATAOBJ_OBFVALUE(t, f, val, enc_fun, dec_fun) DataObfuscator::ValueObfuscator::ValueObfuscator<t, f, enc_fun<t, f>, dec_fun<t, f>>(val)
 
 #define DATAOBJ_FUNC(funcname, ...) template<typename T, ##__VA_ARGS__> constexpr T __forceinline funcname(T c, int i)
+
+#define DATAOBJ_RANDOM(t, seed, compile_time_rand) DataObfuscator::MetaRandom::rand<t, seed, compile_time_rand>().value

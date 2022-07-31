@@ -39,11 +39,9 @@ template<typename T, typename F> constexpr T __forceinline dd(F c) { return c - 
 int main()
 {
 
-	long long x = DataObfuscator::MetaRandom::rand<long long, __COUNTER__>().value;
-	printf("%lld\n", x);
 
-	x = DataObfuscator::MetaRandom::rand<int, __COUNTER__>().value;
-	printf("%lld\n", x);
+	printf("%llx\n", DATAOBJ_RANDOM(long long, __COUNTER__, true));
+	printf("%llx\n", DATAOBJ_RANDOM(long long, __COUNTER__, true));
 
 
 	for (size_t i = 0; i < 3; i++)
