@@ -2,8 +2,6 @@
 
   ## DataObfuscator is the best project written for CPP for obfuscating data in compile time.
 
-  ## IT IS THE BEST LIBRARY EVER CREATED!!!
-
   ## Usage
 
   * Look at example.cpp
