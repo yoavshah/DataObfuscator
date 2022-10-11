@@ -5,11 +5,9 @@
   ## Usage
 
   * Look at example.cpp
-  * Look at example.cpp
-  * Look at example.cpp
 
   * Create Encryption and Decryption routines.
-  ```
+  ```cpp
   template<typename T, (AS MUCH ARGUMENTS YOU WANT)> constexpr T __forceinline e(T c, int i) { return (c ^ K1) + K2; }
   template<typename T, (AS MUCH ARGUMENTS YOU WANT)> constexpr T __forceinline d(T c, int i) { return (c - K2) ^ K1; }
   
@@ -21,7 +19,7 @@
 
   * Obfuscating Strings.
 
-  ```
+  ```cpp
   // This one will encrypt the char array at compile time.
   DATAOBJ_OBFSTR("char array", e, d, (K1 VALUE), (K2 VALUE))
 
@@ -32,7 +30,7 @@
 
   * Obfuscating Arrays.
 
-  ```
+  ```cpp
   // This one will encrypt the char array at compile time.
   DATAOBJ_OBFARRAY(<your type>, <new var name>, DATAOBJ_SINGLE_ARG(e1<your type, K1, ...>), DATAOBJ_SINGLE_ARG(d1<yout type, K1, ...>), { <Your array of data> });
 
