@@ -3,6 +3,13 @@
 #include <limits>
 
 #pragma optimize("", off)
+
+#ifdef __cplusplus
+#define structfuscator_offsetof(s,m) ((::size_t)&reinterpret_cast<char const volatile&>((((s)0)->m)))
+#else
+#define structfuscator_offsetof(s,m) ((size_t)&(((s)0)->m))
+#endif
+
 namespace DataObfuscator {
 
 	// Compile time index array.
@@ -112,26 +119,34 @@ namespace DataObfuscator {
 
 	}
 
-	namespace ValueObfuscator {
-		template<typename T, typename F, F(*enc_fun)(T), T(*dec_fun)(F)> struct ValueObfuscator
+	template<typename T, typename F, F(*enc_fun)(T), T(*dec_fun)(F)> struct ValueObfuscator
+	{
+		volatile T dec_val;
+		volatile F enc_val;
+
+		inline void decrypt()
 		{
-			T dec_val;
-			F enc_val;
+			dec_val = dec_fun(enc_val);
+		}
 
-			inline void decrypt()
-			{
-				dec_val = dec_fun(enc_val);
-			}
+		operator T() const
+		{
+			return dec_val;
+		}
 
-			operator T() const
-			{
-				return dec_val;
-			}
+		constexpr __forceinline ValueObfuscator(const T val) : enc_val{ enc_fun(val) }, dec_val{ 0 }
+		{ decrypt(); }
 
-			constexpr __forceinline ValueObfuscator(const T val) : enc_val{ enc_fun(val) }, dec_val{ 0 }
-			{ decrypt(); }
+	};
 
-		};
+	template<size_t pos, size_t(*enc_fun)(size_t), size_t(*dec_fun)(size_t)> struct Structfuscator
+	{
+		volatile ValueObfuscator<size_t, size_t, enc_fun, dec_fun> v;
+
+		constexpr __forceinline Structfuscator() : v(pos)
+		{
+		}
+
 	};
 
 	namespace ArrayObfuscator {
@@ -233,13 +248,16 @@ namespace DataObfuscator {
 
 
 #define DATAOBJ_SINGLE_ARG(...) __VA_ARGS__
-#define DATAOBJ_OBFARRAY(t, var_name, enc_fun, dec_fun, ...) DataObfuscator::ArrayObfuscator::ArrayObfuscator<t, enc_fun, dec_fun, DataObfuscator::Make_Indexes<DataObfuscator::ArrayObfuscator::list_size<t>(__VA_ARGS__)>::type> var_name(__VA_ARGS__); var_name.decrypt();
-
 #define DATAOBJ_GET_STR_TYPE(str) std::remove_const<std::remove_pointer<std::decay<decltype(str)>::type>::type>::type
-#define DATAOBJ_OBFSTR(str, enc_func, dec_func, ...) (DataObfuscator::StringObfuscator::StringObfuscator<DATAOBJ_GET_STR_TYPE(str), enc_func<DATAOBJ_GET_STR_TYPE(str), ##__VA_ARGS__>, dec_func<DATAOBJ_GET_STR_TYPE(str), ##__VA_ARGS__>, DataObfuscator::Make_Indexes<sizeof(str) - 1>::type>(str)).decrypt()
-
-#define DATAOBJ_OBFVALUE(t, f, val, enc_fun, dec_fun) DataObfuscator::ValueObfuscator::ValueObfuscator<t, f, enc_fun<t, f>, dec_fun<t, f>>(val)
-
 #define DATAOBJ_FUNC(funcname, ...) template<typename T, ##__VA_ARGS__> constexpr T __forceinline funcname(T c, int i)
 
+
 #define DATAOBJ_RANDOM(t, seed, compile_time_rand) DataObfuscator::MetaRandom::rand<t, seed, compile_time_rand>().value
+
+#define DATAOBJ_OBFVALUE(t, f, val, enc_fun, dec_fun, ...) DataObfuscator::ValueObfuscator<t, f, enc_fun<t, f, ##__VA_ARGS__>, dec_fun<t, f, ##__VA_ARGS__>>(val)
+
+#define DATAOBJ_OBFARRAY(t, var_name, enc_fun, dec_fun, ...) DataObfuscator::ArrayObfuscator::ArrayObfuscator<t, enc_fun, dec_fun, DataObfuscator::Make_Indexes<DataObfuscator::ArrayObfuscator::list_size<t>(__VA_ARGS__)>::type> var_name(__VA_ARGS__); var_name.decrypt();
+
+#define DATAOBJ_OBFSTR(str, enc_func, dec_func, ...) (DataObfuscator::StringObfuscator::StringObfuscator<DATAOBJ_GET_STR_TYPE(str), enc_func<DATAOBJ_GET_STR_TYPE(str), ##__VA_ARGS__>, dec_func<DATAOBJ_GET_STR_TYPE(str), ##__VA_ARGS__>, DataObfuscator::Make_Indexes<sizeof(str) - 1>::type>(str)).decrypt()
+
+#define DATAOBJ_STRUCT(t, address, field, enc_func, dec_func, ...) *(volatile decltype(((t)0)->field)*)((size_t)address + DataObfuscator::Structfuscator<structfuscator_offsetof(t, field), enc_func<##__VA_ARGS__>, dec_func<##__VA_ARGS__>>().v.dec_val)
