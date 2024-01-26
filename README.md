@@ -13,14 +13,17 @@
 
   ## Capabilities
 
-  This library can:
+  * Generate random number (any type and any size) at compile time
 
-	* Generate random number (any type and any size) at compile time
-	* Generate custom encryptions
-	* Encrypt a value of any data type and decrypt it at runtime with a custom encryption and decryption routine
-	* Obfuscate access to structures fields
-	* Obfuscate strings, also automating the string encryption and decryption when using wide strings
-	* Obfuscate arrays of any data types
+  * Generate custom encryptions
+
+  * Encrypt a value of any data type and decrypt it at runtime with a custom encryption and decryption routine
+
+  * Obfuscate access to structures fields
+
+  * Obfuscate strings, also automating the string encryption and decryption when using wide strings
+
+  * Obfuscate arrays of any data types
 
  ## Images
  This is an example of obfuscating a value, as you can see in the disassembler the value 0x12345678 is being encrypted to 0xBB9D7759 at compile time, then using the key 0xA9A92121 it is being decrypted at runtime
