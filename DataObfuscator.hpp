@@ -115,13 +115,29 @@ namespace DataObfuscator {
 		template<typename T, unsigned int seed, typename Indexes> struct rand_helper;
 		template<typename T, unsigned int seed, int... I> struct rand_helper<T, seed, Indexes<I...>> {
 			
-			volatile const __int32 rand_buffers[sizeof...(I)];
+			const __int32 rand_buffers[sizeof...(I)];
 
 			constexpr __forceinline rand_helper() : rand_buffers{ rand_generator<seed, I + 5>::value...}
 			{ }
 
-			operator T() const {
-				return *((T*)rand_buffers);
+			constexpr operator T() const {
+				T total = 0;
+
+				if (sizeof(T) / sizeof(__int32) == 0)
+				{
+					total = (T)rand_buffers[0];
+				}
+				else 
+				{
+					for (size_t i = 0; i < sizeof(T) / sizeof(__int32); i++)
+					{
+						unsigned int p = i * 32;
+
+						total += ((T)rand_buffers[i]) << p;
+					}
+				}
+
+				return total;
 			}
 
 		};

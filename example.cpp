@@ -1,11 +1,22 @@
 #include "DataObfuscator.hpp"
 #include <stdio.h>
 
+template <typename T, T v>
+struct ConstExpr
+{
+	T val;
+	constexpr ConstExpr() : val{ v }
+	{}
+
+
+};
+
+
 #pragma region RandomValueExample
 __declspec(noinline) void RandomExample()
 {
-	long value = DATAOBJ_RANDOM(long long, __COUNTER__, true);
-	printf("value: %x\n", value);
+	long long value = DATAOBJ_RANDOM(long long, __COUNTER__, true);
+	printf("value: %llx\n", value);
 }
 
 #pragma endregion
